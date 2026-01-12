@@ -7,7 +7,7 @@
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-pink-50 to-purple-100 px-2 pb-6">
+<body class="min-h-screen px-2 pb-6" id="app-body">
   <div id="root" class="max-w-4xl mx-auto"></div>
 
   <!-- React & ReactDOM CDN -->
@@ -20,6 +20,7 @@
     const { useState, useEffect, useRef } = React;
 
     function DessertCostCalculator() {
+      const [darkMode, setDarkMode] = useState(false);
       const [activeTab, setActiveTab] = useState('recipe');
       const [stockItems, setStockItems] = useState({});
       const [recipes, setRecipes] = useState({});
@@ -57,6 +58,16 @@
       const [marginPercent, setMarginPercent] = useState('');
 
       const fileInputRef = useRef(null);
+
+      // ===== 다크모드 =====
+      useEffect(() => {
+        const body = document.getElementById('app-body');
+        if (darkMode) {
+          body.className = 'min-h-screen px-2 pb-6 bg-gradient-to-br from-blue-900 to-indigo-900';
+        } else {
+          body.className = 'min-h-screen px-2 pb-6 bg-gradient-to-br from-pink-50 to-purple-100';
+        }
+      }, [darkMode]);
 
       // ===== 로컬스토리지 =====
       useEffect(() => {
@@ -728,17 +739,24 @@
       return (
         <div className="space-y-3 sm:space-y-5 pt-3">
           {/* 상단 영역 (헤더 + 탭) */}
-          <div className="sticky top-0 z-30 space-y-2 pb-2 bg-gradient-to-br from-pink-50/90 to-purple-100/90 backdrop-blur-md">
+          <div className={`sticky top-0 z-30 space-y-2 pb-2 backdrop-blur-md ${darkMode ? 'bg-gradient-to-br from-blue-900/90 to-indigo-900/90' : 'bg-gradient-to-br from-pink-50/90 to-purple-100/90'}`}>
             {/* 헤더 */}
-            <div className="bg-white rounded-2xl shadow-md px-4 py-3 sm:p-6">
+            <div className={`rounded-2xl shadow-md px-4 py-3 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-pink-600">🍰 디저트 원가 계산기</h1>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                  <h1 className={`text-2xl sm:text-3xl font-bold ${darkMode ? 'text-blue-400' : 'text-pink-600'}`}>🍰 디저트 원가 계산기</h1>
+                  <p className={`text-xs sm:text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     iPhone에서 쓰기 좋게 정리된 레시피·원가 관리 도구
                   </p>
                 </div>
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-2 justify-end flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setDarkMode(!darkMode)}
+                    className={`px-4 py-3 sm:px-5 sm:py-3 rounded-xl active:scale-95 transition-all text-sm sm:text-base flex items-center gap-1 shadow font-bold ${darkMode ? 'bg-yellow-500 text-gray-900 hover:bg-yellow-400' : 'bg-gray-800 text-white hover:bg-gray-700'}`}
+                  >
+                    {darkMode ? '☀️ 라이트' : '🌙 다크'}
+                  </button>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -746,7 +764,7 @@
                       e.stopPropagation();
                       openExportModal();
                     }}
-                    className="px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 active:scale-95 transition-all text-xs sm:text-sm flex items-center gap-1 shadow"
+                    className="px-4 py-3 sm:px-5 sm:py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 active:scale-95 transition-all text-sm sm:text-base flex items-center gap-1 shadow font-bold"
                   >
                     📤 내보내기
                   </button>
@@ -757,7 +775,7 @@
                       e.stopPropagation();
                       fileInputRef.current?.click();
                     }}
-                    className="px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 active:scale-95 transition-all text-xs sm:text-sm flex items-center gap-1 shadow"
+                    className="px-4 py-3 sm:px-5 sm:py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 active:scale-95 transition-all text-sm sm:text-base flex items-center gap-1 shadow font-bold"
                   >
                     📥 가져오기
                   </button>
@@ -773,8 +791,8 @@
             </div>
 
             {/* 탭 */}
-            <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-              <div className="flex text-xs sm:text-sm">
+            <div className={`rounded-2xl shadow-md overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className="flex text-sm sm:text-base">
                 {[
                   { id: 'stock', label: '📦 재고' },
                   { id: 'recipe', label: '📝 레시피' },
@@ -783,10 +801,14 @@
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 py-2.5 sm:py-3 font-semibold transition-colors ${
+                    className={`flex-1 py-3 sm:py-4 font-bold transition-colors ${
                       activeTab === tab.id
-                        ? 'bg-pink-500 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? darkMode
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-pink-500 text-white'
+                        : darkMode
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     {tab.label}
@@ -798,8 +820,8 @@
 
           {/* 재고 관리 탭 */}
           {activeTab === 'stock' && (
-            <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6">
-              <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-800">재고 DB 관리</h2>
+            <div className={`rounded-2xl shadow-md p-4 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <h2 className={`text-lg sm:text-2xl font-bold mb-3 sm:mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>재고 DB 관리</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <input
@@ -807,12 +829,12 @@
                   placeholder="재료명"
                   value={newStock.name}
                   onChange={(e) => setNewStock({ ...newStock, name: e.target.value })}
-                  className="px-3 py-2 border rounded-xl text-sm"
+                  className={`px-4 py-3 border rounded-xl text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                 />
                 <select
                   value={newStock.unit}
                   onChange={(e) => setNewStock({ ...newStock, unit: e.target.value })}
-                  className="px-3 py-2 border rounded-xl text-sm"
+                  className={`px-4 py-3 border rounded-xl text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                 >
                   <option value="g">g</option>
                   <option value="ml">ml</option>
@@ -824,44 +846,44 @@
                   placeholder="총 수량"
                   value={newStock.totalQty}
                   onChange={(e) => setNewStock({ ...newStock, totalQty: e.target.value })}
-                  className="px-3 py-2 border rounded-xl text-sm"
+                  className={`px-4 py-3 border rounded-xl text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                 />
                 <input
                   type="number"
                   placeholder="총 비용"
                   value={newStock.totalCost}
                   onChange={(e) => setNewStock({ ...newStock, totalCost: e.target.value })}
-                  className="px-3 py-2 border rounded-xl text-sm"
+                  className={`px-4 py-3 border rounded-xl text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                 />
                 <button
                   onClick={addStockItem}
-                  className="bg-pink-500 text-white py-2 rounded-xl hover:bg-pink-600 transition-colors flex items-center justify-center gap-1 text-sm"
+                  className={`py-3 rounded-xl transition-colors flex items-center justify-center gap-1 text-base font-bold ${darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-pink-500 text-white hover:bg-pink-600'}`}
                 >
                   ➕ 추가
                 </button>
               </div>
 
-              <div className="text-[10px] text-gray-400 mb-1 sm:hidden pl-1">
+              <div className={`text-[10px] mb-1 sm:hidden pl-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                 ← 좌우로 밀어 재고 목록을 볼 수 있어요
               </div>
 
               <div className="overflow-x-auto relative">
                 <table className="w-full min-w-[520px] text-xs sm:text-sm">
-                  <thead className="bg-gray-100">
+                  <thead className={darkMode ? 'bg-gray-700' : 'bg-gray-100'}>
                     <tr>
-                      <th className="px-2 py-2 text-left">재료명</th>
-                      <th className="px-2 py-2 text-left">단위</th>
-                      <th className="px-2 py-2 text-right">총 수량</th>
-                      <th className="px-2 py-2 text-right">총 비용</th>
-                      <th className="px-2 py-2 text-right">단가</th>
-                      <th className="px-2 py-2 text-center">관리</th>
+                      <th className={`px-2 py-3 text-left ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>재료명</th>
+                      <th className={`px-2 py-3 text-left ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>단위</th>
+                      <th className={`px-2 py-3 text-right ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>총 수량</th>
+                      <th className={`px-2 py-3 text-right ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>총 비용</th>
+                      <th className={`px-2 py-3 text-right ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>단가</th>
+                      <th className={`px-2 py-3 text-center ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>관리</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Object.entries(stockItems)
                       .sort(([nameA], [nameB]) => nameA.localeCompare(nameB, 'ko'))
                       .map(([name, item]) => (
-                        <tr key={name} className="border-t hover:bg-pink-50">
+                        <tr key={name} className={`border-t ${darkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-pink-50'}`}>
                           {editingStockItem?.originalName === name ? (
                             <>
                               <td className="px-2 py-2">
@@ -871,7 +893,7 @@
                                   onChange={(e) =>
                                     setEditingStockItem({ ...editingStockItem, name: e.target.value })
                                   }
-                                  className="w-full px-2 py-1 border rounded text-xs"
+                                  className={`w-full px-3 py-2 border rounded text-sm ${darkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'}`}
                                 />
                               </td>
                               <td className="px-2 py-2">
@@ -880,7 +902,7 @@
                                   onChange={(e) =>
                                     setEditingStockItem({ ...editingStockItem, unit: e.target.value })
                                   }
-                                  className="w-full px-2 py-1 border rounded text-xs"
+                                  className={`w-full px-3 py-2 border rounded text-sm ${darkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'}`}
                                 >
                                   <option value="g">g</option>
                                   <option value="ml">ml</option>
@@ -898,7 +920,7 @@
                                       totalQty: e.target.value
                                     })
                                   }
-                                  className="w-full px-2 py-1 border rounded text-right text-xs"
+                                  className={`w-full px-3 py-2 border rounded text-right text-sm ${darkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'}`}
                                 />
                               </td>
                               <td className="px-2 py-2">
@@ -911,10 +933,10 @@
                                       totalCost: e.target.value
                                     })
                                   }
-                                  className="w-full px-2 py-1 border rounded text-right text-xs"
+                                  className={`w-full px-3 py-2 border rounded text-right text-sm ${darkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'}`}
                                 />
                               </td>
-                              <td className="px-2 py-2 text-right text-[11px] text-gray-600">
+                              <td className={`px-2 py-2 text-right text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                                 {editingStockItem.totalQty && editingStockItem.totalCost
                                   ? (
                                       parseFloat(editingStockItem.totalCost) /
@@ -928,14 +950,14 @@
                                   <button
                                     type="button"
                                     onClick={() => updateStockItem(name)}
-                                    className="min-w-[36px] min-h-[36px] px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 active:scale-95 transition-all text-xs"
+                                    className="min-w-[44px] min-h-[44px] px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 active:scale-95 transition-all text-sm font-bold"
                                   >
                                     ✓
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => setEditingStockItem(null)}
-                                    className="min-w-[36px] min-h-[36px] px-2 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 active:scale-95 transition-all text-xs"
+                                    className="min-w-[44px] min-h-[44px] px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 active:scale-95 transition-all text-sm font-bold"
                                   >
                                     ✗
                                   </button>
@@ -944,15 +966,15 @@
                             </>
                           ) : (
                             <>
-                              <td className="px-2 py-2 font-medium text-xs sm:text-sm">{name}</td>
-                              <td className="px-2 py-2 text-xs sm:text-sm">{item.unit}</td>
-                              <td className="px-2 py-2 text-right text-xs sm:text-sm">
+                              <td className={`px-2 py-2 font-medium text-xs sm:text-sm ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>{name}</td>
+                              <td className={`px-2 py-2 text-xs sm:text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{item.unit}</td>
+                              <td className={`px-2 py-2 text-right text-xs sm:text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                 {item.totalQty.toLocaleString()}
                               </td>
-                              <td className="px-2 py-2 text-right text-xs sm:text-sm">
+                              <td className={`px-2 py-2 text-right text-xs sm:text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                 {item.totalCost.toLocaleString()}원
                               </td>
-                              <td className="px-2 py-2 text-right text-[11px] text-gray-600">
+                              <td className={`px-2 py-2 text-right text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                                 {item.unitCost.toFixed(2)}원
                               </td>
                               <td className="px-2 py-2">
@@ -962,14 +984,14 @@
                                     onClick={() =>
                                       setEditingStockItem({ ...item, name, originalName: name })
                                     }
-                                    className="min-w-[36px] min-h-[36px] px-2 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:scale-95 transition-all text-xs"
+                                    className="min-w-[44px] min-h-[44px] px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:scale-95 transition-all text-sm font-bold"
                                   >
                                     ✎
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => deleteStockItem(name)}
-                                    className="min-w-[36px] min-h-[36px] px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 active:scale-95 transition-all text-xs"
+                                    className="min-w-[44px] min-h-[44px] px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 active:scale-95 transition-all text-sm font-bold"
                                   >
                                     🗑
                                   </button>
@@ -987,15 +1009,15 @@
 
           {/* 레시피 작성 탭 */}
           {activeTab === 'recipe' && (
-            <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6">
-              <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-800">레시피 작성</h2>
+            <div className={`rounded-2xl shadow-md p-4 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <h2 className={`text-lg sm:text-2xl font-bold mb-3 sm:mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>레시피 작성</h2>
 
               <input
                 type="text"
                 placeholder="레시피 이름 (예: 레몬 마들렌)"
                 value={recipeName}
                 onChange={(e) => setRecipeName(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-pink-200 rounded-xl mb-3 sm:mb-4 text-base sm:text-lg font-medium"
+                className={`w-full px-4 sm:px-5 py-3 sm:py-4 border-2 rounded-xl mb-3 sm:mb-4 text-base sm:text-lg font-medium ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-pink-200 text-gray-900'}`}
               />
 
               <div className="flex gap-2 mb-3">
@@ -1010,10 +1032,14 @@
                       unit: 'g'
                     })
                   }
-                  className={`flex-1 py-2.5 rounded-xl text-sm sm:text-base font-bold transition-all ${
+                  className={`flex-1 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-bold transition-all ${
                     newIngredient.inputMode === 'select'
-                      ? 'bg-pink-500 text-white shadow'
-                      : 'bg-gray-200 text-gray-600'
+                      ? darkMode
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'bg-pink-500 text-white shadow'
+                      : darkMode
+                        ? 'bg-gray-700 text-gray-300'
+                        : 'bg-gray-200 text-gray-600'
                   }`}
                 >
                   📦 재고에서 선택
@@ -1029,10 +1055,14 @@
                       unit: 'g'
                     })
                   }
-                  className={`flex-1 py-2.5 rounded-xl text-sm sm:text-base font-bold transition-all ${
+                  className={`flex-1 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-bold transition-all ${
                     newIngredient.inputMode === 'custom'
-                      ? 'bg-pink-500 text-white shadow'
-                      : 'bg-gray-200 text-gray-600'
+                      ? darkMode
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'bg-pink-500 text-white shadow'
+                      : darkMode
+                        ? 'bg-gray-700 text-gray-300'
+                        : 'bg-gray-200 text-gray-600'
                   }`}
                 >
                   ✏️ 직접 입력
@@ -1054,12 +1084,12 @@
                         setShowIngredientDropdown(true);
                       }}
                       onFocus={() => setShowIngredientDropdown(true)}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-pink-200 rounded-xl text-sm sm:text-lg"
+                      className={`w-full px-4 sm:px-5 py-3 sm:py-4 border-2 rounded-xl text-base sm:text-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-pink-200 text-gray-900'}`}
                     />
                     {showIngredientDropdown && (
-                      <div className="absolute z-20 mt-1 w-full max-h-[50vh] overflow-y-auto bg-white border border-pink-200 rounded-xl shadow-lg text-sm">
+                      <div className={`absolute z-20 mt-1 w-full max-h-[50vh] overflow-y-auto border rounded-xl shadow-lg text-sm ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-pink-200'}`}>
                         {getFilteredStockNames().length === 0 ? (
-                          <div className="px-4 py-2 text-xs text-gray-400">
+                          <div className={`px-4 py-2 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                             검색 결과가 없습니다
                           </div>
                         ) : (
@@ -1068,8 +1098,14 @@
                               type="button"
                               key={name}
                               onClick={() => handleSelectIngredientFromList(name)}
-                              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-pink-50 ${
-                                newIngredient.name === name ? 'bg-pink-100 font-semibold' : ''
+                              className={`w-full text-left px-4 py-3 text-base ${
+                                newIngredient.name === name
+                                  ? darkMode
+                                    ? 'bg-blue-700 font-semibold text-white'
+                                    : 'bg-pink-100 font-semibold'
+                                  : darkMode
+                                    ? 'hover:bg-gray-600 text-gray-200'
+                                    : 'hover:bg-pink-50'
                               }`}
                             >
                               {name}
@@ -1082,7 +1118,7 @@
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] sm:text-sm font-medium mb-1 text-gray-700">
+                      <label className={`block text-xs sm:text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         사용량
                       </label>
                       <input
@@ -1092,11 +1128,11 @@
                         onChange={(e) =>
                           setNewIngredient({ ...newIngredient, qty: e.target.value })
                         }
-                        className="w-full px-3 py-2.5 border-2 border-pink-200 rounded-xl text-center text-sm sm:text-lg"
+                        className={`w-full px-4 py-3 border-2 rounded-xl text-center text-base sm:text-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-pink-200 text-gray-900'}`}
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] sm:text-sm font-medium mb-1 text-gray-700">
+                      <label className={`block text-xs sm:text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         비용 (원)
                       </label>
                       <input
@@ -1106,7 +1142,7 @@
                         onChange={(e) =>
                           setNewIngredient({ ...newIngredient, cost: e.target.value })
                         }
-                        className="w-full px-3 py-2.5 border-2 border-pink-200 rounded-xl text-center text-sm sm:text-lg"
+                        className={`w-full px-4 py-3 border-2 rounded-xl text-center text-base sm:text-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-pink-200 text-gray-900'}`}
                       />
                     </div>
                   </div>
@@ -1115,7 +1151,7 @@
                     stockItems[newIngredient.name] &&
                     newIngredient.qty &&
                     !newIngredient.cost && (
-                      <div className="bg-blue-50 p-2 rounded-lg text-center text-xs sm:text-sm text-blue-700">
+                      <div className={`p-3 rounded-lg text-center text-sm sm:text-base font-medium ${darkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-50 text-blue-700'}`}>
                         💡 자동 계산:{' '}
                         {(
                           stockItems[newIngredient.name].unitCost *
@@ -1128,7 +1164,7 @@
                   <button
                     type="button"
                     onClick={addIngredientToRecipe}
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 sm:py-4 rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all flex items-center justify-center gap-2 text-sm sm:text-lg font-bold shadow"
+                    className={`w-full py-4 sm:py-5 rounded-xl transition-all flex items-center justify-center gap-2 text-base sm:text-xl font-bold shadow ${darkMode ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700' : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600'}`}
                   >
                     ➕ 재료 추가하기
                   </button>
@@ -1145,12 +1181,12 @@
                     onChange={(e) =>
                       setNewIngredient({ ...newIngredient, name: e.target.value })
                     }
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-pink-200 rounded-xl text-sm sm:text-lg"
+                    className={`w-full px-4 sm:px-5 py-3 sm:py-4 border-2 rounded-xl text-base sm:text-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-pink-200 text-gray-900'}`}
                   />
 
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-[11px] sm:text-sm font-medium mb-1 text-gray-700">
+                      <label className={`block text-xs sm:text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         사용량
                       </label>
                       <input
@@ -1160,11 +1196,11 @@
                         onChange={(e) =>
                           setNewIngredient({ ...newIngredient, qty: e.target.value })
                         }
-                        className="w-full px-3 py-2.5 border-2 border-pink-200 rounded-xl text-center text-sm sm:text-lg"
+                        className={`w-full px-4 py-3 border-2 rounded-xl text-center text-base sm:text-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-pink-200 text-gray-900'}`}
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] sm:text-sm font-medium mb-1 text-gray-700">
+                      <label className={`block text-xs sm:text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         단위
                       </label>
                       <select
@@ -1172,7 +1208,7 @@
                         onChange={(e) =>
                           setNewIngredient({ ...newIngredient, unit: e.target.value })
                         }
-                        className="w-full px-3 py-2.5 border-2 border-pink-200 rounded-xl text-sm sm:text-lg"
+                        className={`w-full px-4 py-3 border-2 rounded-xl text-base sm:text-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-pink-200 text-gray-900'}`}
                       >
                         <option value="g">g</option>
                         <option value="ml">ml</option>
@@ -1181,7 +1217,7 @@
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[11px] sm:text-sm font-medium mb-1 text-gray-700">
+                      <label className={`block text-xs sm:text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         비율/비용
                       </label>
                       <input
@@ -1191,7 +1227,7 @@
                         onChange={(e) =>
                           setNewIngredient({ ...newIngredient, cost: e.target.value })
                         }
-                        className="w-full px-3 py-2.5 border-2 border-pink-200 rounded-xl text-center text-sm sm:text-lg"
+                        className={`w-full px-4 py-3 border-2 rounded-xl text-center text-base sm:text-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-pink-200 text-gray-900'}`}
                       />
                     </div>
                   </div>
@@ -1199,7 +1235,7 @@
                   <button
                     type="button"
                     onClick={addIngredientToRecipe}
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 sm:py-4 rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all flex items-center justify-center gap-2 text-sm sm:text-lg font-bold shadow"
+                    className={`w-full py-4 sm:py-5 rounded-xl transition-all flex items-center justify-center gap-2 text-base sm:text-xl font-bold shadow ${darkMode ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700' : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600'}`}
                   >
                     ➕ 재료 추가하기
                   </button>
@@ -1208,17 +1244,17 @@
 
               {currentRecipe.length > 0 && (
                 <>
-                  <div className="text-[10px] text-gray-400 mb-1 sm:hidden pl-1">
+                  <div className={`text-[10px] mb-1 sm:hidden pl-1 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                     ← 좌우로 밀어 재료 목록을 볼 수 있어요
                   </div>
                   <div className="overflow-x-auto mb-3 sm:mb-4">
                     <table className="w-full min-w-[480px] text-xs sm:text-sm">
-                      <thead className="bg-gray-100">
+                      <thead className={darkMode ? 'bg-gray-700' : 'bg-gray-100'}>
                         <tr>
-                          <th className="px-3 py-2 text-left">재료명</th>
-                          <th className="px-3 py-2 text-right">사용량</th>
-                          <th className="px-3 py-2 text-right">비용</th>
-                          <th className="px-3 py-2 text-center">관리</th>
+                          <th className={`px-3 py-3 text-left ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>재료명</th>
+                          <th className={`px-3 py-3 text-right ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>사용량</th>
+                          <th className={`px-3 py-3 text-right ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>비용</th>
+                          <th className={`px-3 py-3 text-center ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>관리</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1228,10 +1264,10 @@
                           .map(({ originalIndex, ...item }) => {
                             const idx = originalIndex;
                             return (
-                              <tr key={idx} className="border-t hover:bg-pink-50">
+                              <tr key={idx} className={`border-t ${darkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-pink-50'}`}>
                                 {editingRecipeIndex === idx ? (
                                   <>
-                                    <td className="px-3 py-2">{item.name}</td>
+                                    <td className={`px-3 py-2 ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>{item.name}</td>
                                     <td className="px-3 py-2">
                                       <input
                                         type="number"
@@ -1239,10 +1275,10 @@
                                         onChange={(e) =>
                                           updateIngredientInRecipe(idx, 'qty', e.target.value)
                                         }
-                                        className="w-full px-2 py-1 border rounded text-right text-xs"
+                                        className={`w-full px-3 py-2 border rounded text-right text-sm ${darkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'}`}
                                       />
                                     </td>
-                                    <td className="px-3 py-2 text-right">
+                                    <td className={`px-3 py-2 text-right ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
                                       {item.cost.toFixed(0)}원
                                     </td>
                                     <td className="px-3 py-2">
@@ -1250,7 +1286,7 @@
                                         <button
                                           type="button"
                                           onClick={() => setEditingRecipeIndex(null)}
-                                          className="min-w-[36px] min-h-[36px] px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 text-xs"
+                                          className="min-w-[44px] min-h-[44px] px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-bold"
                                         >
                                           ✓
                                         </button>
@@ -1259,12 +1295,12 @@
                                   </>
                                 ) : (
                                   <>
-                                    <td className="px-3 py-2 font-medium">{item.name}</td>
-                                    <td className="px-3 py-2 text-right">
+                                    <td className={`px-3 py-2 font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>{item.name}</td>
+                                    <td className={`px-3 py-2 text-right ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                       {item.qty}
                                       {item.unit}
                                     </td>
-                                    <td className="px-3 py-2 text-right">
+                                    <td className={`px-3 py-2 text-right ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                       {item.cost.toFixed(0)}원
                                     </td>
                                     <td className="px-3 py-2">
@@ -1272,14 +1308,14 @@
                                         <button
                                           type="button"
                                           onClick={() => setEditingRecipeIndex(idx)}
-                                          className="min-w-[36px] min-h-[36px] px-2 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs"
+                                          className="min-w-[44px] min-h-[44px] px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-bold"
                                         >
                                           ✎
                                         </button>
                                         <button
                                           type="button"
                                           onClick={() => deleteIngredientFromRecipe(idx)}
-                                          className="min-w-[36px] min-h-[36px] px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-xs"
+                                          className="min-w-[44px] min-h-[44px] px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-bold"
                                         >
                                           🗑
                                         </button>
@@ -1290,16 +1326,16 @@
                               </tr>
                             );
                           })}
-                        <tr className="border-t-2 border-pink-300 bg-pink-50">
+                        <tr className={`border-t-2 ${darkMode ? 'border-blue-600 bg-gray-700' : 'border-pink-300 bg-pink-50'}`}>
                           <td
                             colSpan={2}
-                            className="px-3 py-2 sm:py-3 text-right font-bold text-sm sm:text-lg"
+                            className={`px-3 py-3 sm:py-4 text-right font-bold text-sm sm:text-lg ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}
                           >
                             총 원가:
                           </td>
                           <td
                             colSpan={2}
-                            className="px-3 py-2 sm:py-3 text-right font-bold text-lg sm:text-xl text-pink-600"
+                            className={`px-3 py-3 sm:py-4 text-right font-bold text-lg sm:text-xl ${darkMode ? 'text-blue-400' : 'text-pink-600'}`}
                           >
                             {Math.round(
                               calculateTotalCost(currentRecipe)
@@ -1314,7 +1350,7 @@
                   {/* 계당 원가 계산 */}
                   <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <div>
-                      <label className="block text-[11px] sm:text-sm font-medium mb-1 text-gray-700">
+                      <label className={`block text-xs sm:text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         📦 생산수량
                       </label>
                       <input
@@ -1322,11 +1358,11 @@
                         placeholder="12"
                         value={productionQty}
                         onChange={(e) => setProductionQty(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-xl text-center text-xs sm:text-base"
+                        className={`w-full px-4 py-3 border rounded-xl text-center text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300'}`}
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] sm:text-sm font-medium mb-1 text-gray-700">
+                      <label className={`block text-xs sm:text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         📦 포장재 (개당)
                       </label>
                       <input
@@ -1334,11 +1370,11 @@
                         placeholder="0"
                         value={packagingCost}
                         onChange={(e) => setPackagingCost(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-xl text-center text-xs sm:text-base"
+                        className={`w-full px-4 py-3 border rounded-xl text-center text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300'}`}
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] sm:text-sm font-medium mb-1 text-gray-700">
+                      <label className={`block text-xs sm:text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                         💰 마진율(%)
                       </label>
                       <input
@@ -1346,50 +1382,50 @@
                         placeholder="40"
                         value={marginPercent}
                         onChange={(e) => setMarginPercent(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-xl text-center text-xs sm:text-base"
+                        className={`w-full px-4 py-3 border rounded-xl text-center text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300'}`}
                       />
                     </div>
                   </div>
 
                   {(productionQty || packagingCost || marginPercent) && (
-                    <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
-                      <div className="space-y-1.5 text-[11px] sm:text-sm">
+                    <div className={`rounded-xl p-4 sm:p-5 mb-3 sm:mb-4 ${darkMode ? 'bg-gradient-to-r from-gray-700 to-gray-800' : 'bg-gradient-to-r from-pink-50 to-purple-50'}`}>
+                      <div className="space-y-2 text-xs sm:text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600">1회 재료 원가:</span>
-                          <span className="font-semibold">
+                          <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>1회 재료 원가:</span>
+                          <span className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                             {calculateUnitCost().materialCost.toFixed(0)}원
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">생산 수량:</span>
-                          <span className="font-semibold">
+                          <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>생산 수량:</span>
+                          <span className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                             {calculateUnitCost().quantity}개
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">포장재 (개당):</span>
-                          <span className="font-semibold">
+                          <span className={darkMode ? 'text-gray-300' : 'text-gray-600'}>포장재 (개당):</span>
+                          <span className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                             {calculateUnitCost().packaging.toFixed(0)}원
                           </span>
                         </div>
-                        <div className="flex justify-between border-t-2 border-pink-300 pt-2 mt-1">
-                          <span className="font-bold text-gray-700">총 비용:</span>
-                          <span className="font-bold text-base sm:text-lg text-gray-700">
+                        <div className={`flex justify-between border-t-2 pt-2 mt-1 ${darkMode ? 'border-blue-600' : 'border-pink-300'}`}>
+                          <span className={`font-bold ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>총 비용:</span>
+                          <span className={`font-bold text-base sm:text-lg ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
                             {calculateUnitCost().totalCost.toFixed(0)}원
                           </span>
                         </div>
-                        <div className="text-[10px] text-gray-500 text-right">
+                        <div className={`text-[10px] text-right ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                           ({calculateUnitCost().quantity} ×{' '}
                           {calculateUnitCost().materialCost.toFixed(0)}) + (
                           {calculateUnitCost().quantity} ×{' '}
                           {calculateUnitCost().packaging.toFixed(0)})
                         </div>
                         {marginPercent > 0 && (
-                          <div className="flex justify-between bg-purple-100 -mx-3 sm:-mx-4 -mb-3 sm:-mb-4 mt-2 p-2 sm:p-3 rounded-b-xl">
-                            <span className="font-bold text-purple-700 text-xs sm:text-sm">
+                          <div className={`flex justify-between -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 mt-2 p-3 sm:p-4 rounded-b-xl ${darkMode ? 'bg-indigo-900' : 'bg-purple-100'}`}>
+                            <span className={`font-bold text-xs sm:text-sm ${darkMode ? 'text-indigo-300' : 'text-purple-700'}`}>
                               🏷️ 판매가 (마진 {marginPercent}%):
                             </span>
-                            <span className="font-bold text-base sm:text-xl text-purple-700">
+                            <span className={`font-bold text-base sm:text-xl ${darkMode ? 'text-indigo-300' : 'text-purple-700'}`}>
                               {calculateUnitCost().sellingPrice.toFixed(0)}원
                             </span>
                           </div>
@@ -1400,7 +1436,7 @@
 
                   <button
                     onClick={saveRecipe}
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-lg hover:from-pink-600 hover:to-purple-600 transition-all"
+                    className={`w-full py-4 sm:py-5 rounded-xl font-bold text-base sm:text-xl transition-all ${darkMode ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700' : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600'}`}
                   >
                     💾 레시피 저장하기
                   </button>
@@ -1411,11 +1447,11 @@
 
           {/* 레시피 목록 탭 */}
           {activeTab === 'list' && (
-            <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6">
-              <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-800">저장된 레시피 목록</h2>
+            <div className={`rounded-2xl shadow-md p-4 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <h2 className={`text-lg sm:text-2xl font-bold mb-3 sm:mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>저장된 레시피 목록</h2>
 
               {Object.keys(recipes).length === 0 ? (
-                <div className="text-center py-8 sm:py-12 text-gray-400">
+                <div className={`text-center py-8 sm:py-12 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                   <p className="text-base sm:text-lg">아직 저장된 레시피가 없습니다</p>
                   <p className="text-xs sm:text-sm mt-2">
                     레시피 작성 탭에서 새 레시피를 만들어보세요!
@@ -1452,38 +1488,38 @@
                     return (
                       <div
                         key={name}
-                        className="border-2 border-gray-200 rounded-2xl p-3 sm:p-4 hover:border-pink-300 transition-colors"
+                        className={`border-2 rounded-2xl p-3 sm:p-4 transition-colors ${darkMode ? 'border-gray-700 hover:border-blue-500 bg-gray-750' : 'border-gray-200 hover:border-pink-300'}`}
                       >
                         <div className="flex justify-between items-start mb-2 sm:mb-3 flex-wrap gap-2">
-                          <h3 className="text-base sm:text-xl font-bold text-gray-800 max-w-[60%]">
+                          <h3 className={`text-base sm:text-xl font-bold max-w-[60%] ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                             {name}
                           </h3>
                           <div className="flex gap-1 sm:gap-2 flex-wrap justify-end">
                             <button
                               type="button"
                               onClick={() => downloadRecipeHTML(name, recipeData)}
-                              className="px-2.5 py-1.5 sm:px-3 sm:py-1 bg-purple-500 text-white rounded-lg hover:bg-purple-600 text-[11px] sm:text-sm flex items-center gap-1 active:scale-95 transition-all"
+                              className="px-3 py-2 sm:px-4 sm:py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 text-xs sm:text-base font-bold flex items-center gap-1 active:scale-95 transition-all"
                             >
                               🖨️ HTML
                             </button>
                             <button
                               type="button"
                               onClick={() => loadRecipe(name)}
-                              className="px-2.5 py-1.5 sm:px-3 sm:py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-[11px] sm:text-sm active:scale-95 transition-all"
+                              className="px-3 py-2 sm:px-4 sm:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs sm:text-base font-bold active:scale-95 transition-all"
                             >
                               불러오기
                             </button>
                             <button
                               type="button"
                               onClick={() => deleteRecipe(name)}
-                              className="px-2.5 py-1.5 sm:px-3 sm:py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-[11px] sm:text-sm active:scale-95 transition-all"
+                              className="px-3 py-2 sm:px-4 sm:py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-xs sm:text-base font-bold active:scale-95 transition-all"
                             >
                               삭제
                             </button>
                           </div>
                         </div>
 
-                        <div className="space-y-0.5 text-[11px] sm:text-sm text-gray-600 max-h-32 overflow-y-auto pr-1">
+                        <div className={`space-y-0.5 text-xs sm:text-sm max-h-32 overflow-y-auto pr-1 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                           {items
                             .map((item, idx) => ({ ...item, originalIndex: idx }))
                             .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
@@ -1498,16 +1534,16 @@
                             ))}
                         </div>
 
-                        <div className="mt-2 pt-2 border-t border-gray-200 flex justify-between items-center">
-                          <span className="font-bold text-gray-700 text-xs sm:text-sm">총 원가:</span>
-                          <span className="text-base sm:text-xl font-bold text-pink-600">
+                        <div className={`mt-2 pt-2 border-t flex justify-between items-center ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                          <span className={`font-bold text-xs sm:text-sm ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>총 원가:</span>
+                          <span className={`text-base sm:text-xl font-bold ${darkMode ? 'text-blue-400' : 'text-pink-600'}`}>
                             {Math.round(baseCost).toLocaleString()}원
                           </span>
                         </div>
 
                         {sellingInfo && (
-                          <div className="mt-1.5 pt-1.5 border-t border-pink-100">
-                            <div className="flex justify-between text-[10px] sm:text-xs text-gray-500">
+                          <div className={`mt-1.5 pt-1.5 border-t ${darkMode ? 'border-gray-700' : 'border-pink-100'}`}>
+                            <div className={`flex justify-between text-[10px] sm:text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                               <span>생산수량 / 포장재 / 마진</span>
                               <span>
                                 {sellingInfo.qty}개 · {sellingInfo.packaging.toLocaleString()}원 ·{' '}
@@ -1515,10 +1551,10 @@
                               </span>
                             </div>
                             <div className="flex justify-between items-center mt-1">
-                              <span className="font-bold text-purple-700 text-xs sm:text-sm">
+                              <span className={`font-bold text-xs sm:text-sm ${darkMode ? 'text-indigo-400' : 'text-purple-700'}`}>
                                 판매가 (마진·포장재 포함):
                               </span>
-                              <span className="text-sm sm:text-lg font-bold text-purple-700">
+                              <span className={`text-sm sm:text-lg font-bold ${darkMode ? 'text-indigo-400' : 'text-purple-700'}`}>
                                 {Math.round(sellingInfo.sellingPrice).toLocaleString()}원
                               </span>
                             </div>
@@ -1534,29 +1570,29 @@
 
           {/* 내보내기 모달 */}
           {showExportModal && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-40">
-              <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-40">
+              <div className={`rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[80vh] overflow-y-auto ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-lg sm:text-2xl font-bold text-gray-800">레시피 내보내기</h3>
+                  <h3 className={`text-lg sm:text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>레시피 내보내기</h3>
                   <button
                     type="button"
                     onClick={() => setShowExportModal(false)}
-                    className="text-gray-400 hover:text-gray-600 text-xl px-1"
+                    className={`text-xl px-1 ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
                   >
                     ×
                   </button>
                 </div>
-                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                <p className={`text-xs sm:text-sm mb-3 sm:mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                   공유할 레시피를 선택하세요
                 </p>
 
                 <div className="mb-3 sm:mb-4">
-                  <label className="flex items-center gap-2 p-2 sm:p-3 bg-gray-100 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors text-xs sm:text-sm">
+                  <label className={`flex items-center gap-2 p-3 sm:p-4 rounded-xl cursor-pointer transition-colors text-sm sm:text-base ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}>
                     <input
                       type="checkbox"
                       checked={selectedRecipes.length === Object.keys(recipes).length}
                       onChange={toggleSelectAll}
-                      className="w-4 h-4"
+                      className="w-5 h-5"
                     />
                     <span className="font-bold">
                       전체 선택 ({selectedRecipes.length}/{Object.keys(recipes).length})
@@ -1572,21 +1608,25 @@
                     return (
                       <label
                         key={recipeName}
-                        className={`flex items-center gap-3 p-2.5 sm:p-3 rounded-xl border-2 cursor-pointer transition-all text-xs sm:text-sm ${
+                        className={`flex items-center gap-3 p-3 sm:p-4 rounded-xl border-2 cursor-pointer transition-all text-sm sm:text-base ${
                           selectedRecipes.includes(recipeName)
-                            ? 'border-pink-500 bg-pink-50'
-                            : 'border-gray-200 hover:border-pink-300 hover:bg-gray-50'
+                            ? darkMode
+                              ? 'border-blue-500 bg-blue-900/30'
+                              : 'border-pink-500 bg-pink-50'
+                            : darkMode
+                              ? 'border-gray-700 hover:border-blue-400 hover:bg-gray-700'
+                              : 'border-gray-200 hover:border-pink-300 hover:bg-gray-50'
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={selectedRecipes.includes(recipeName)}
                           onChange={() => toggleRecipeSelection(recipeName)}
-                          className="w-4 h-4"
+                          className="w-5 h-5"
                         />
                         <div className="flex-1">
-                          <div className="font-medium truncate">{recipeName}</div>
-                          <div className="text-[11px] sm:text-xs text-gray-500">
+                          <div className={`font-medium truncate ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{recipeName}</div>
+                          <div className={`text-xs sm:text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                             재료 {items.length}개 · {calculateTotalCost(items).toFixed(0)}원
                           </div>
                         </div>
@@ -1599,14 +1639,14 @@
                   <button
                     type="button"
                     onClick={exportData}
-                    className="flex-1 bg-pink-500 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-pink-600 active:scale-95 transition-all"
+                    className={`flex-1 py-3 sm:py-4 rounded-xl font-bold text-base hover:scale-[1.02] active:scale-95 transition-all ${darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-pink-500 text-white hover:bg-pink-600'}`}
                   >
                     내보내기 ({selectedRecipes.length}개)
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowExportModal(false)}
-                    className="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-300 active:scale-95 transition-all"
+                    className={`flex-1 py-3 sm:py-4 rounded-xl font-bold text-base hover:scale-[1.02] active:scale-95 transition-all ${darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
                   >
                     취소
                   </button>
@@ -1617,19 +1657,19 @@
 
           {/* 확인 모달 */}
           {confirmModal.show && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-40">
-              <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-sm w-full">
-                <h3 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-40">
+              <div className={`rounded-2xl p-4 sm:p-6 max-w-sm w-full ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                <h3 className={`text-lg sm:text-xl font-bold mb-3 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
                   {confirmModal.type === 'deleteStock' && '재고 삭제'}
                   {confirmModal.type === 'updateStock' && '재고 수정'}
                   {confirmModal.type === 'deleteRecipe' && '레시피 삭제'}
                   {confirmModal.type === 'duplicateStock' && '⚠️ 중복 재료'}
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-600 mb-4 whitespace-pre-line">
+                <p className={`text-sm sm:text-base mb-4 whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                   {confirmModal.message}
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -1638,7 +1678,7 @@
                       if (confirmModal.type === 'deleteRecipe') executeDeleteRecipe();
                       if (confirmModal.type === 'duplicateStock') executeDuplicateStockUpdate();
                     }}
-                    className="flex-1 bg-pink-500 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-pink-600 transition-colors"
+                    className={`flex-1 py-3 sm:py-4 rounded-xl font-bold text-base transition-colors ${darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-pink-500 text-white hover:bg-pink-600'}`}
                   >
                     예
                   </button>
@@ -1647,7 +1687,7 @@
                     onClick={() =>
                       setConfirmModal({ show: false, type: '', data: null, message: '' })
                     }
-                    className="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-300 transition-colors"
+                    className={`flex-1 py-3 sm:py-4 rounded-xl font-bold text-base transition-colors ${darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
                   >
                     아니오
                   </button>
